@@ -1,0 +1,4 @@
+*.pbf
+*.osm
+pkg/
+src/

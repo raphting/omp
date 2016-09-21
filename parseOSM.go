@@ -56,6 +56,7 @@ func main() {
     check(err)
     defer r.Close()
 
+    //Write geographic data to these files
     nodeFile, err := os.Create("./nodes")
     check(err)
     defer nodeFile.Close()
@@ -63,11 +64,13 @@ func main() {
     check(err)
     defer waterFile.Close()
 
+    //Start goroutines for writing to files concurrently
     nodeChan := make(chan gosmparse.Node, 8)
     waterChan := make(chan []int64, 8)
     go StoreNode(nodeChan, nodeFile)
     go StoreWater(waterChan, waterFile)
 
+    //Parse OSM.PBF file
     dec := gosmparse.NewDecoder(r)
     err = dec.Parse(&dataHandler{nodeChan: nodeChan, waterChan: waterChan})
     check(err)
@@ -79,7 +82,5 @@ func main() {
         }
     }
 
-    nodeFile.Sync()
-    waterFile.Sync()
     fmt.Println("End.")
 }

@@ -16,5 +16,6 @@ Build and run
 -------------
 
 This will create two files "nodes" and "waters" with a lot of data in it:
-    go run parseOSM.go
+
+`go run parseOSM.go`
 

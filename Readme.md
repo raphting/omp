@@ -1,14 +1,20 @@
 One month project
 =================
 
+What is this all about?
+-----------------------
+
+Please check my [weblog](https://raphaelsprenger.de/blog/) to read about it.
+
 Dependencies
 ------------
 
-OSM data
-`go get "github.com/thomersch/gosmparse"`
-`go get "github.com/streamrail/concurrent-map"`
+1. OSM data with the source of your choice
+1. `go get "github.com/thomersch/gosmparse"`
 
-Build
------
+Build and run
+-------------
 
-go build parseOSM.go
+This will create two files "nodes" and "waters" with a lot of data in it:
+    go run parseOSM.go
+

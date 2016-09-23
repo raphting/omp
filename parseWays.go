@@ -27,6 +27,7 @@ func intToByte(myInt uint64) []byte {
 	return res
 }
 
+//Parse custom storage format back to float
 func valToFloats(val []byte) []float64 {
 	var cnt uint8 = 0
 	var latRaw uint64 = 0
@@ -58,25 +59,38 @@ func main() {
 	check(err)
 	defer db.Close()
 
+    matchFile, err := os.Create("./matchWayNode")
+    check(err)
+    defer matchFile.Close()
 
+
+	//Parse water ways line by line
 	scanner := bufio.NewScanner(wayFile)
-	check(err)
 	for scanner.Scan() {
 		data := strings.Split(scanner.Text(), ",")
 
 		for id := range data {
 			idnum, _ := strconv.ParseUint(data[id], 10, 64)
 			key := intToByte(idnum)
-			fmt.Println("ID: ", idnum)
+
+			//Query DB and write result to file
 			db.View(func(tx *bolt.Tx) error {
 				bucket := tx.Bucket([]byte("latlon"))
 				val := bucket.Get(key)
 				if len(val) == 16 {
-					fmt.Println(valToFloats(val))
+					valNum := valToFloats(val)
+					matchFile.WriteString(fmt.Sprintf("%v,%v", valNum[0], valNum[1]))
+
+					//Don't write colons at the end of the line
+					if id != len(data) - 1 {
+						matchFile.WriteString(",")
+					}
 				}
 				return nil
 			})
 		}
+		//New line for each way
+        matchFile.WriteString("\n")
 	}
 	fmt.Println("End.")
 }

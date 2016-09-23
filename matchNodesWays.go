@@ -6,6 +6,7 @@ import "math"
 import "strconv"
 import "strings"
 import "os"
+import "github.com/boltdb/bolt"
 
 func check(e error) {
 	if e != nil {
@@ -29,11 +30,26 @@ func intToByte(myInt uint64) []byte {
 func main() {
 	fmt.Println("Reading Node file")
 
-	nodeFile, err := os.Open("./nodes")
+	nodeFile, err := os.Open("./nodes.sorted")
 	check(err)
 	defer nodeFile.Close()
 
+	db, err := bolt.Open("second.db", 0600, nil)
+	check(err)
+	defer db.Close()
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte("latlon"))
+		return err
+	})
+	check(err)
+
+
 	scanner := bufio.NewScanner(nodeFile)
+	tx, err := db.Begin(true)
+	check(err)
+	bucket := tx.Bucket([]byte("latlon"))
+	var progress uint64 = 0
 	for scanner.Scan() {
 		data := strings.Split(scanner.Text(), ",")
 		id, _ := strconv.ParseUint(data[0], 10, 64)
@@ -42,11 +58,17 @@ func main() {
 
 		key := intToByte(id)
 		val1 := intToByte(math.Float64bits(lat))
-
 		val2 := intToByte(math.Float64bits(lon))
 		value := append(val1, val2...)
 
-		fmt.Println(key, value)
+		bucket.Put(key, value)
+		progress++
+		if progress % 100000 == 0 {
+			tx.Commit()
+			fmt.Print("#")
+		}
 	}
-
+	tx.Commit()
+	fmt.Println()
+	fmt.Println("End.")
 }

@@ -10,6 +10,7 @@ import "github.com/boltdb/bolt"
 
 func check(e error) {
 	if e != nil {
+		fmt.Println(e)
 		panic(e)
 	}
 }
@@ -61,10 +62,15 @@ func main() {
 		val2 := intToByte(math.Float64bits(lon))
 		value := append(val1, val2...)
 
-		bucket.Put(key, value)
+		err := bucket.Put(key, value)
+		check(err)
+
 		progress++
 		if progress % 100000 == 0 {
 			tx.Commit()
+			tx, err = db.Begin(true)
+			check(err)
+			bucket = tx.Bucket([]byte("latlon"))
 			fmt.Print("#")
 		}
 	}

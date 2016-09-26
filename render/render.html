@@ -1,0 +1,56 @@
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r81/three.min.js"></script>
+</head>
+<body>
+
+</body>
+
+<script>
+
+request = new XMLHttpRequest();
+request.open('GET', './rawData', true);
+request.onload = function() {
+  if (request.status >= 200 && request.status < 400){
+    var content = request.responseText;
+	drawLines(content);
+};
+}
+
+request.send();
+
+function drawLines(content) {
+	var renderer = new THREE.WebGLRenderer();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	document.body.appendChild(renderer.domElement);
+	var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 500);
+	camera.position.set(0, 0, 10);
+	camera.lookAt(new THREE.Vector3(0, 0, 0));
+	var scene = new THREE.Scene();
+
+	var material = new THREE.LineBasicMaterial({
+			color: 0x40a4df,
+			linewidth: 1
+		});
+
+	var rivers = content.split('\n');
+	for(var i = 0; i < rivers.length; i++) {
+
+		var geometry = new THREE.Geometry();
+		var coords = rivers[i].split(',');
+		geometry.vertices.push(new THREE.Vector3(coords[1]*10 - 100, coords[0]*10 - 535, 0));
+
+		for(var cnt = 2; cnt < coords.length; cnt += 2) {
+			geometry.vertices.push(new THREE.Vector3(coords[cnt+1]*10 - 100, coords[cnt]*10 - 535, 0));
+		}
+
+		var line = new THREE.Line(geometry.clone(), material);
+		scene.add(line);
+	}
+
+
+	renderer.render(scene, camera);
+}
+
+</script>
+</html>

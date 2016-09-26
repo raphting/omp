@@ -30,3 +30,5 @@ Create a Key-Value DB consisting of all Node-IDs as keys and the corresponding l
 ### Third Step
 Use the database to query the "waters" file for latitude and longitude. Write a new file. Each line contains the coordinates of one way in the format: lat,lon,lat,lon,...
 
+### Visualize
+After the third step you can use the render.html file to visualize the data in the webbrowser. See my blog (link above) for images.
